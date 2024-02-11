@@ -7,6 +7,7 @@ function UploadFile() {
     const [filename, setFilename] = useState('')
     const [file, setFile] = useState('')
     const [status, setstatus] = useState('')
+    const [imageData, setImageData] = useState(null);
 
     let api = 'http://127.0.0.1:8000/uploadfile'
 
@@ -30,7 +31,8 @@ function UploadFile() {
         axios.post(api + '/files/', formData, axiosConfig).then(
             response =>{
                 console.log(response.data)
-                setstatus('File Uploaded Successfully,'+response.data.intercept)
+                setstatus(response.data.message)
+                setImageData(response.data.image_data)
             }
         ).catch(error =>{
             console.log(error)
@@ -61,6 +63,11 @@ function UploadFile() {
                         <br />
                         <br />
                         {status ? <h2>{status}</h2> : null}
+                        <div>
+                            {imageData ? (
+                                <img src={`data:image/png;base64,${imageData}`} alt="Scatter Plot" />
+                            ) : null}
+                        </div>
                     </form>
                 </div>
             </div>

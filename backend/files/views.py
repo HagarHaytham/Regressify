@@ -6,6 +6,10 @@ from rest_framework import status
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 import io
+import matplotlib.pyplot as plt
+from PIL import Image
+import base64
+
 
 class LinearRegressionView(APIView):
 
@@ -28,25 +32,46 @@ class LinearRegressionView(APIView):
                 # print(csv_data)
 
                 df = pd.read_csv(io.StringIO(csv_data))
-                print(df)
-                X = df[['SAT']]
-                y = df['GPA']
+                # print(df)
+                X = df.iloc[:, :-1]  # All columns except the last
+
+                y = df.iloc[:, -1]
                 # Perform linear regression
                 model = LinearRegression()
                 model.fit(X, y)
 
-                # Get regression coefficients and intercept
-                coefficients = model.coef_
-                intercept = model.intercept_
+                # # Get regression coefficients and intercept
+                # coefficients = model.coef_
+                # intercept = model.intercept_
 
-                print(intercept)
-                # # Prepare response
-                response_data = {
-                    'coefficients': coefficients.tolist(),
-                    'intercept': intercept,
-                    'message': 'Linear regression completed successfully',
-                }
-                return Response(response_data, status=status.HTTP_200_OK)
+                # print(intercept)
+                # # # Prepare response
+                # response_data = {
+                #     'coefficients': coefficients.tolist(),
+                #     'intercept': intercept,
+                #     'message': 'Linear regression completed successfully',
+                # }
+                # return Response(response_data, status=status.HTTP_200_OK)
+
+                # Create the scatter plot
+                plt.figure(figsize=(8, 6))
+                plt.scatter(X, y, label='Actual')
+                plt.plot(X, model.predict(X), color='red', label='Predicted')
+                plt.xlabel('X')
+                plt.ylabel('y')
+                plt.title('Scatter Plot with Linear Regression')
+                plt.legend()
+
+                # Convert plot to image
+                buf = io.BytesIO()
+                plt.savefig(buf, format='png')
+                buf.seek(0)
+                image_data = base64.b64encode(buf.read()).decode('utf-8')
+
+                # Return image data in the response
+                return Response({'image_data': image_data, 'message': 'Linear regression completed successfully',})
+
+
         except Exception as e:
             error_message = str(e)
             return Response({'status': 'error', 'message': error_message})
