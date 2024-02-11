@@ -6,59 +6,67 @@ function UploadFile() {
     const [problemName, setProblemName] = useState('')
     const [filename, setFilename] = useState('')
     const [file, setFile] = useState('')
-    const [status, setstatus] = useState('')
+    const [status, setStatus] = useState('')
     const [imageData, setImageData] = useState(null);
 
     let api = 'http://127.0.0.1:8000/uploadfile'
 
-     
-    const saveFile = () =>{
-        console.log('Button clicked')
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]); // Set file data
+        setFilename(event.target.files[0].name); // Set filename
+      };
+    
+      const handleSubmit = (event) => {
+        event.preventDefault(); // Prevent default form submission
+    
+        if (!problemName || !file) {
+          setStatus('Please enter a problem name and select a file to upload.');
+          return; // Early exit if required fields are empty
+        }
+    
+        console.log('Form submitted'); 
+    
+        const formData = new FormData();
+        // formData.append('name', problemName);
+        formData.append('csv', file, filename);
 
-        let formData = new FormData();
-        // formData.append("name",problemName)
-        console.log(filename)
-        formData.append("csv",file, filename)
-
-        let axiosConfig = {
+        const axiosConfig = {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Content-Disposition': 'attachment; filename='+filename
             }
         }
-        console.log(formData.get('csv')); 
-        console.log(formData)
-        axios.post(api + '/files/', formData, axiosConfig).then(
-            response =>{
-                console.log(response.data)
-                setstatus(response.data.message)
-                setImageData(response.data.image_data)
-            }
-        ).catch(error =>{
-            console.log(error)
-        })
-    }
+    
+        axios.post(api + '/files/', formData, axiosConfig)
+          .then((response) => {
+            setStatus(response.data.message);
+            setImageData(response.data.image_data);
+          })
+          .catch((error) => {
+            console.error(error);
+            setStatus('An error occurred during file upload.');
+          });
+      };
+    
 
     return (
         <div className="container-fluid">
             <h1 className="text-center bg-primary text-white mt-2 p-3">Regressify : A Simple Linear Regression Tool </h1>
             <div className="row">
-                <div className="col-md-4">
+                <div >
                     <h2 className="alert alert-success">File Upload Section</h2>
-                    <form >
+                    <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label htmlFor="exampleFormControlFile1" className="float-left">Problem Name</label>
-                            <input type="text" onChange={e => setProblemName(e.target.value)} className="form-control" />
+                            <input type="text" onChange={e => setProblemName(e.target.value)} className="form-control" required/>
                         </div>
                         <div className="form-group">
-                            <label htmlFor="exampleFormControlFile1" className="float-left">Browse A File To Upload</label>
-                            <input type="file" accept=".csv" onChange={e =>{
-                                setFile(e.target.files[0]); // Set file data
-                                setFilename(e.target.files[0].name); // Set filename
-                                }} className="form-control" />
+                            <label htmlFor="exampleFormControlFile" className="float-left">Browse A File To Upload</label>
+                            <input type="file" accept=".csv" onChange={handleFileChange}
+                             className="form-control" required />
                         </div>
 
-                        <button type="button" onClick={saveFile} className="btn btn-primary float-left mt-2">Submit</button>
+                        <button type="submit" className="btn btn-primary float-left mt-2">Submit</button>
                         <br />
                         <br />
                         <br />
