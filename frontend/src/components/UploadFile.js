@@ -1,15 +1,23 @@
-import React, {useState,useEffect} from 'react'
+import React, {useState} from 'react'
 import axios from 'axios'
+import ScatterPlot from './ScatterPlot';
 
-
-function UploadFile() {
+function UploadPlot() {
     const [problemName, setProblemName] = useState('')
     const [filename, setFilename] = useState('')
     const [file, setFile] = useState('')
     const [status, setStatus] = useState('')
-    const [imageData, setImageData] = useState(null);
-
+    // const [imageData, setImageData] = useState(null);
+    const [xData,setXData] = useState()
+    const [yData,setYData]  = useState()   
+    const [xLabel,setXLabel]= useState()
+    const [yLabel,setYLabel]= useState()
+    const [coeff ,setCoeff]= useState()
+    const [intercept ,setIntercept]= useState()
+    const [dataFetched,setDataFetched] = useState(false)
     let api = 'http://127.0.0.1:8000/uploadfile'
+
+    // let api = 'https://regressify-api-0e7a76474e0a.herokuapp.com/uploadfile'
 
     const handleFileChange = (event) => {
         setFile(event.target.files[0]); // Set file data
@@ -39,8 +47,16 @@ function UploadFile() {
     
         axios.post(api + '/files/', formData, axiosConfig)
           .then((response) => {
-            setStatus(response.data.message);
-            setImageData(response.data.image_data);
+            // console.log(response)            
+            setXData(response.data.x_data)
+            setYData( response.data.y_data)
+            setXLabel( response.data.x_label)
+            setYLabel( response.data.y_label)
+            setCoeff( response.data.coefficients)
+            setIntercept( response.data.intercept)
+            setStatus(response.data.message)
+            setDataFetched(true)
+            // setImageData(response.data.image_data);
           })
           .catch((error) => {
             console.error(error);
@@ -71,11 +87,7 @@ function UploadFile() {
                         <br />
                         <br />
                         {status ? <h2>{status}</h2> : null}
-                        <div>
-                            {imageData ? (
-                                <img src={`data:image/png;base64,${imageData}`} alt="Scatter Plot" />
-                            ) : null}
-                        </div>
+                        {dataFetched && <ScatterPlot xData={xData} yData={yData} xLabel={xLabel} yLabel={yLabel} coeff={coeff} intercept={intercept} problemName={problemName}></ScatterPlot> }
                     </form>
                 </div>
             </div>
@@ -84,4 +96,4 @@ function UploadFile() {
     )
 }
 
-export default UploadFile
+export default UploadPlot

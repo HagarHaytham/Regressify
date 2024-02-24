@@ -36,40 +36,44 @@ class LinearRegressionView(APIView):
                 X = df.iloc[:, :-1]  # All columns except the last
 
                 y = df.iloc[:, -1]
+                target_name = df.columns[-1]
                 # Perform linear regression
                 model = LinearRegression()
                 model.fit(X, y)
+                # # Prepare response
+                response_data = {
+                    'x_data': X[X.columns[0]],
+                    'y_data': y,
+                    # 'y_predicted': model.predict(X),
+                    'x_label': X.columns[0],
+                    'y_label': target_name,
+                    'coefficients' : model.coef_,
+                    'intercept' :model.intercept_,
 
-                # # Get regression coefficients and intercept
-                # coefficients = model.coef_
-                # intercept = model.intercept_
+                    'message': 'Linear regression completed successfully',
+                }  
+                return Response(response_data, status=status.HTTP_200_OK)
 
-                # print(intercept)
-                # # # Prepare response
-                # response_data = {
-                #     'coefficients': coefficients.tolist(),
-                #     'intercept': intercept,
-                #     'message': 'Linear regression completed successfully',
-                # }
-                # return Response(response_data, status=status.HTTP_200_OK)
+                # # Create the scatter plot
+                # plt.figure(figsize=(8, 6))
+                # plt.scatter(X, y, label='Actual')
+                # plt.plot(X, model.predict(X), color='red', label='Predicted')
+                # plt.xlabel(X.columns[0])
+                # plt.ylabel(target_name)
+                # plt.title('Scatter Plot with Linear Regression')
+                # plt.legend()
+                # print(X)
+                # print(y)
+                # print(model.predict(X))
 
-                # Create the scatter plot
-                plt.figure(figsize=(8, 6))
-                plt.scatter(X, y, label='Actual')
-                plt.plot(X, model.predict(X), color='red', label='Predicted')
-                plt.xlabel('X')
-                plt.ylabel('y')
-                plt.title('Scatter Plot with Linear Regression')
-                plt.legend()
+                # # Convert plot to image
+                # buf = io.BytesIO()
+                # plt.savefig(buf, format='png')
+                # buf.seek(0)
+                # image_data = base64.b64encode(buf.read()).decode('utf-8')
 
-                # Convert plot to image
-                buf = io.BytesIO()
-                plt.savefig(buf, format='png')
-                buf.seek(0)
-                image_data = base64.b64encode(buf.read()).decode('utf-8')
-
-                # Return image data in the response
-                return Response({'image_data': image_data, 'message': 'Linear regression completed successfully',})
+                # # Return image data in the response
+                # return Response({'image_data': image_data, 'message': 'Linear regression completed successfully',})
 
 
         except Exception as e:
